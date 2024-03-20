@@ -27,7 +27,7 @@ class ConnectionFactory extends BaseConnectionFactory
         if (isset($params['dbname'])) {
             $dbName = $this->getDbNameFromEnv($params['dbname']);
         } else {
-            $dbName = $this->getDbNameFromEnv($params['master']['dbname']);
+            $dbName = $this->getDbNameFromEnv($params['primary']['dbname']);
         }
 
         if ('pdo_sqlite' === $params['driver']) {
@@ -35,13 +35,27 @@ class ConnectionFactory extends BaseConnectionFactory
                 $params['path'] = str_replace('__DBNAME__', $dbName, $params['path']);
             }
 
-            if (isset($params['master']['path'])) {
-                $params['master']['path'] = str_replace('__DBNAME__', $dbName, $params['master']['path']);
+            if (isset($params['primary']['path'])) {
+                $params['primary']['path'] = str_replace('__DBNAME__', $dbName, $params['primary']['path']);
             }
 
             if (!empty($params['slaves'])) {
                 foreach ($params['slaves'] as &$slave) {
                     $slave['path'] = str_replace('__DBNAME__', $dbName, $slave['path']);
+                }
+            }
+        } elseif ('pdo_mysql' === $params['driver']) {
+            if (isset($params['dbname'])) {
+                $params['dbname'] = $this->getDbNameFromEnv($params['dbname']);
+            }
+
+            if (isset($params['primary']['dbname'])) {
+                $params['primary']['dbname'] = $this->getDbNameFromEnv($params['primary']['dbname']);
+            }
+
+            if (!empty($params['slaves'])) {
+                foreach ($params['slaves'] as &$slave) {
+                    $slave['dbname'] = $this->getDbNameFromEnv($slave['dbname']);
                 }
             }
         } else {
